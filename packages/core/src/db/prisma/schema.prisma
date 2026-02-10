@@ -1,0 +1,242 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Site configuration - makes the CMS multi-tenant ready
+model Site {
+  id          String   @id @default(cuid())
+  name        String
+  domain      String?  @unique
+  languages   String[] @default(["en"])
+  defaultLang String   @default("en")
+  logo        String?
+  favicon     String?
+  theme       Json?
+  settings    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Users & Auth
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  password  String
+  name      String
+  role      Role      @default(EDITOR)
+  avatar    String?
+  lastLogin DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  pages     Page[]    @relation("author")
+  articles  Article[] @relation("author")
+  revisions Revision[]
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+// Pages - multilingual with JSON content per locale
+model Page {
+  id            String     @id @default(cuid())
+  slug          String     @unique
+  template      String     @default("default")
+  title         Json
+  content       Json
+  excerpt       Json?
+  featuredImage String?
+  seo           Json?
+  status        PageStatus @default(DRAFT)
+  publishedAt   DateTime?
+  scheduledAt   DateTime?
+  sortOrder     Int        @default(0)
+  parentId      String?
+  parent        Page?      @relation("children", fields: [parentId], references: [id])
+  children      Page[]     @relation("children")
+  authorId      String
+  author        User       @relation("author", fields: [authorId], references: [id])
+  revisions     Revision[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+enum PageStatus {
+  DRAFT
+  PUBLISHED
+  SCHEDULED
+  ARCHIVED
+}
+
+// Revision history for pages
+model Revision {
+  id        String   @id @default(cuid())
+  pageId    String
+  page      Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  title     Json
+  content   Json
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+// Media library
+model Media {
+  id        String   @id @default(cuid())
+  filename  String
+  url       String
+  mimeType  String
+  size      Int
+  alt       Json?
+  folder    String?
+  createdAt DateTime @default(now())
+}
+
+// Document repository
+model Document {
+  id          String            @id @default(cuid())
+  title       Json
+  description Json?
+  fileUrl     String
+  fileName    String
+  fileSize    Int
+  mimeType    String
+  categoryId  String?
+  category    DocumentCategory? @relation(fields: [categoryId], references: [id])
+  language    String?
+  isPublic    Boolean           @default(true)
+  downloads   Int               @default(0)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model DocumentCategory {
+  id        String     @id @default(cuid())
+  name      Json
+  slug      String     @unique
+  documents Document[]
+}
+
+// News articles
+model Article {
+  id            String       @id @default(cuid())
+  slug          String       @unique
+  title         Json
+  content       Json
+  excerpt       Json?
+  featuredImage String?
+  seo           Json?
+  status        PageStatus   @default(DRAFT)
+  publishedAt   DateTime?
+  authorId      String
+  author        User         @relation("author", fields: [authorId], references: [id])
+  tags          ArticleTag[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model Tag {
+  id       String       @id @default(cuid())
+  name     Json
+  slug     String       @unique
+  articles ArticleTag[]
+}
+
+model ArticleTag {
+  articleId String
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tagId     String
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, tagId])
+}
+
+// Events
+model Event {
+  id                  String     @id @default(cuid())
+  slug                String     @unique
+  title               Json
+  description         Json
+  location            Json?
+  startDate           DateTime
+  endDate             DateTime?
+  featuredImage       String?
+  registrationEnabled Boolean    @default(false)
+  registrationUrl     String?
+  status              PageStatus @default(DRAFT)
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+}
+
+// Navigation menus
+model Menu {
+  id    String     @id @default(cuid())
+  name  String     @unique
+  items MenuItem[]
+}
+
+model MenuItem {
+  id        String     @id @default(cuid())
+  label     Json
+  url       String?
+  pageId    String?
+  target    String     @default("_self")
+  sortOrder Int        @default(0)
+  parentId  String?
+  parent    MenuItem?  @relation("children", fields: [parentId], references: [id])
+  children  MenuItem[] @relation("children")
+  menuId    String
+  menu      Menu       @relation(fields: [menuId], references: [id], onDelete: Cascade)
+}
+
+// Newsletter subscribers
+model Subscriber {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  name           String?
+  isVerified     Boolean   @default(false)
+  verifyToken    String?
+  subscribedAt   DateTime  @default(now())
+  unsubscribedAt DateTime?
+}
+
+// Form builder
+model Form {
+  id          String           @id @default(cuid())
+  name        String
+  slug        String           @unique
+  fields      Json
+  settings    Json?
+  submissions FormSubmission[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model FormSubmission {
+  id        String   @id @default(cuid())
+  formId    String
+  form      Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+  data      Json
+  createdAt DateTime @default(now())
+}
+
+// Analytics
+model PageView {
+  id        String   @id @default(cuid())
+  path      String
+  referrer  String?
+  userAgent String?
+  country   String?
+  city      String?
+  createdAt DateTime @default(now())
+
+  @@index([path])
+  @@index([createdAt])
+}

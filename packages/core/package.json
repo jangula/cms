@@ -1,0 +1,39 @@
+{
+  "name": "@angulacms/core",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./db": "./src/db/client.ts",
+    "./auth": "./src/auth/index.ts",
+    "./storage": "./src/storage/index.ts",
+    "./types": "./src/types/index.ts",
+    "./utils": "./src/utils/index.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "db:generate": "prisma generate --schema=src/db/prisma/schema.prisma",
+    "db:push": "prisma db push --schema=src/db/prisma/schema.prisma",
+    "db:migrate": "prisma migrate dev --schema=src/db/prisma/schema.prisma",
+    "db:seed": "tsx src/db/prisma/seed.ts",
+    "db:studio": "prisma studio --schema=src/db/prisma/schema.prisma"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.2.1",
+    "bcryptjs": "^2.4.3",
+    "jose": "^5.9.6",
+    "slugify": "^1.6.6",
+    "sanitize-html": "^2.14.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/sanitize-html": "^2.13.0",
+    "prisma": "^6.2.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "@angulacms/config": "workspace:*"
+  }
+}
