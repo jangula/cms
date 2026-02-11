@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: angulacms
+      POSTGRES_USER: angulacms
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U angulacms"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    environment:
+      DATABASE_URL: postgresql://angulacms:${DB_PASSWORD:-changeme}@postgres:5432/angulacms
+      JWT_SECRET: ${JWT_SECRET}
+      STORAGE_DRIVER: local
+      UPLOAD_DIR: /app/uploads
+      SITE_URL: ${SITE_URL:-http://localhost:3003}
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    environment:
+      DATABASE_URL: postgresql://angulacms:${DB_PASSWORD:-changeme}@postgres:5432/angulacms
+      SITE_URL: ${SITE_URL:-http://localhost:3003}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  uploads:

@@ -1,0 +1,12 @@
+"use client";
+
+import { EventForm } from "@/components/events/event-form";
+
+export default function NewEventPage() {
+  return (
+    <div>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Create New Event</h1>
+      <EventForm mode="create" />
+    </div>
+  );
+}

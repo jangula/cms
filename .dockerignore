@@ -1,0 +1,9 @@
+node_modules
+.next
+.turbo
+.git
+*.md
+.env
+.env.local
+uploads/*
+!uploads/.gitkeep

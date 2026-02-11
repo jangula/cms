@@ -1,29 +1,29 @@
-@import "tailwindcss";
-
 @theme {
-  --color-primary-50: #eff6ff;
-  --color-primary-100: #dbeafe;
-  --color-primary-200: #bfdbfe;
-  --color-primary-300: #93c5fd;
-  --color-primary-400: #60a5fa;
-  --color-primary-500: #3b82f6;
-  --color-primary-600: #2563eb;
-  --color-primary-700: #1d4ed8;
-  --color-primary-800: #1e40af;
-  --color-primary-900: #1e3a8a;
-  --color-primary-950: #172554;
+  /* BCC Ocean Blue palette */
+  --color-primary-50: #eff8ff;
+  --color-primary-100: #dbeefe;
+  --color-primary-200: #bfddfe;
+  --color-primary-300: #93c6fd;
+  --color-primary-400: #60a4fa;
+  --color-primary-500: #3678f6;
+  --color-primary-600: #1a56db;
+  --color-primary-700: #1544b8;
+  --color-primary-800: #173a96;
+  --color-primary-900: #193476;
+  --color-primary-950: #0f1f4d;
 
-  --color-secondary-50: #f0fdfa;
-  --color-secondary-100: #ccfbf1;
-  --color-secondary-200: #99f6e4;
-  --color-secondary-300: #5eead4;
-  --color-secondary-400: #2dd4bf;
-  --color-secondary-500: #14b8a6;
-  --color-secondary-600: #0d9488;
-  --color-secondary-700: #0f766e;
-  --color-secondary-800: #115e59;
-  --color-secondary-900: #134e4a;
-  --color-secondary-950: #042f2e;
+  /* BCC Teal / Marine accent */
+  --color-secondary-50: #effefa;
+  --color-secondary-100: #c8fff1;
+  --color-secondary-200: #91fee3;
+  --color-secondary-300: #52f6d3;
+  --color-secondary-400: #1ee3be;
+  --color-secondary-500: #06c9a6;
+  --color-secondary-600: #01a288;
+  --color-secondary-700: #06816e;
+  --color-secondary-800: #0a6659;
+  --color-secondary-900: #0d544a;
+  --color-secondary-950: #00332e;
 
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 }

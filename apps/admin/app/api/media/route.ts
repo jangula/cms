@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
         url,
         mimeType: file.type,
         size: file.size,
-        alt: alt ? { en: alt } : null,
+        alt: alt ? { en: alt } : undefined,
         folder: folder || "media",
       },
     });
