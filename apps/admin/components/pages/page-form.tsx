@@ -9,6 +9,12 @@ import { MediaPicker } from "../media/media-picker";
 import { apiFetch } from "@/lib/api";
 import { generateSlug } from "@angulacms/core/utils";
 
+interface SeoData {
+  title: string;
+  description: string;
+  ogImage: string;
+}
+
 interface PageData {
   id?: string;
   slug: string;
@@ -18,6 +24,8 @@ interface PageData {
   excerpt: Record<string, string>;
   featuredImage: string;
   status: string;
+  publishedAt: string;
+  seo: Record<string, SeoData>;
 }
 
 interface PageFormProps {
@@ -27,11 +35,19 @@ interface PageFormProps {
 
 const LANGUAGES = ["en", "pt"];
 
+function toDateInputValue(dateStr?: string | null): string {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return "";
+  return d.toISOString().slice(0, 16);
+}
+
 export function PageForm({ initialData, mode }: PageFormProps) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [activeLocale, setActiveLocale] = useState("en");
+  const [seoLocale, setSeoLocale] = useState("en");
 
   const [formData, setFormData] = useState<PageData>({
     slug: initialData?.slug || "",
@@ -41,6 +57,11 @@ export function PageForm({ initialData, mode }: PageFormProps) {
     excerpt: initialData?.excerpt || { en: "", pt: "" },
     featuredImage: initialData?.featuredImage || "",
     status: initialData?.status || "DRAFT",
+    publishedAt: toDateInputValue(initialData?.publishedAt),
+    seo: initialData?.seo || {
+      en: { title: "", description: "", ogImage: "" },
+      pt: { title: "", description: "", ogImage: "" },
+    },
   });
 
   // Auto-generate slug from English title
@@ -60,6 +81,7 @@ export function PageForm({ initialData, mode }: PageFormProps) {
     const data = {
       ...formData,
       status: status || formData.status,
+      publishedAt: formData.publishedAt || undefined,
     };
 
     try {
@@ -81,6 +103,12 @@ export function PageForm({ initialData, mode }: PageFormProps) {
       setSaving(false);
     }
   }
+
+  const currentSeo = formData.seo[seoLocale] || {
+    title: "",
+    description: "",
+    ogImage: "",
+  };
 
   return (
     <div className="space-y-6">
@@ -185,18 +213,116 @@ export function PageForm({ initialData, mode }: PageFormProps) {
         </div>
       </Card>
 
+      <Card>
+        <div className="flex items-center justify-between mb-4">
+          <CardTitle>SEO</CardTitle>
+          <div className="flex gap-2">
+            {LANGUAGES.map((lang) => (
+              <button
+                key={lang}
+                type="button"
+                onClick={() => setSeoLocale(lang)}
+                className={`px-3 py-1 text-sm rounded-lg ${
+                  seoLocale === lang
+                    ? "bg-primary-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                {lang.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <Input
+            label="Meta Title"
+            value={currentSeo.title}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                seo: {
+                  ...prev.seo,
+                  [seoLocale]: { ...currentSeo, title: e.target.value },
+                },
+              }))
+            }
+            placeholder="Page title for search engines"
+          />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Meta Description
+            </label>
+            <textarea
+              value={currentSeo.description}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  seo: {
+                    ...prev.seo,
+                    [seoLocale]: {
+                      ...currentSeo,
+                      description: e.target.value,
+                    },
+                  },
+                }))
+              }
+              placeholder="Brief description for search results"
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              {currentSeo.description.length}/160 characters
+            </p>
+          </div>
+          <Input
+            label="OG Image URL"
+            value={currentSeo.ogImage}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                seo: {
+                  ...prev.seo,
+                  [seoLocale]: { ...currentSeo, ogImage: e.target.value },
+                },
+              }))
+            }
+            placeholder="Social media share image URL"
+          />
+        </div>
+      </Card>
+
       <div className="flex items-center justify-between bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-        <Select
-          value={formData.status}
-          onChange={(e) =>
-            setFormData((prev) => ({ ...prev, status: e.target.value }))
-          }
-          options={[
-            { value: "DRAFT", label: "Draft" },
-            { value: "PUBLISHED", label: "Published" },
-            { value: "ARCHIVED", label: "Archived" },
-          ]}
-        />
+        <div className="flex items-center gap-4">
+          <Select
+            value={formData.status}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, status: e.target.value }))
+            }
+            options={[
+              { value: "DRAFT", label: "Draft" },
+              { value: "PUBLISHED", label: "Published" },
+              { value: "SCHEDULED", label: "Scheduled" },
+              { value: "ARCHIVED", label: "Archived" },
+            ]}
+          />
+          <div>
+            <label className="block text-xs text-gray-500 mb-0.5">
+              Publish Date
+            </label>
+            <input
+              type="datetime-local"
+              value={formData.publishedAt}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  publishedAt: e.target.value,
+                }))
+              }
+              className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+          </div>
+        </div>
 
         <div className="flex gap-3">
           <Button variant="outline" onClick={() => router.push("/pages")}>

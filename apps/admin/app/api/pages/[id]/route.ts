@@ -51,6 +51,7 @@ export async function PUT(
       template,
       parentId,
       sortOrder,
+      publishedAt,
     } = body;
 
     const existing = await prisma.page.findUnique({ where: { id } });
@@ -92,10 +93,9 @@ export async function PUT(
         template,
         parentId,
         sortOrder,
-        publishedAt:
-          status === "PUBLISHED" && !existing.publishedAt
-            ? new Date()
-            : existing.publishedAt,
+        publishedAt: publishedAt
+          ? new Date(publishedAt)
+          : (status === "PUBLISHED" && !existing.publishedAt ? new Date() : existing.publishedAt),
       },
       include: {
         author: { select: { id: true, name: true } },

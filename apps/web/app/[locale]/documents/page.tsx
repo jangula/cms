@@ -131,8 +131,7 @@ export default async function DocumentsPage({ params, searchParams }: Props) {
                   </div>
 
                   <a
-                    href={doc.fileUrl}
-                    download
+                    href={`/api/documents/${doc.id}/download`}
                     className="flex-shrink-0 inline-flex items-center px-4 py-2 bg-primary-50 text-primary-700 rounded-lg text-sm font-medium hover:bg-primary-100 transition-colors"
                   >
                     <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

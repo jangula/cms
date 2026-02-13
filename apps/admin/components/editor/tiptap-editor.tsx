@@ -1,11 +1,22 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import { clsx } from "clsx";
+import { Modal } from "@angulacms/ui";
+import { apiFetch } from "@/lib/api";
+
+interface MediaItem {
+  id: string;
+  filename: string;
+  url: string;
+  mimeType: string;
+  size: number;
+}
 
 interface TipTapEditorProps {
   content: string;
@@ -14,7 +25,13 @@ interface TipTapEditorProps {
   className?: string;
 }
 
-function MenuBar({ editor }: { editor: ReturnType<typeof useEditor> }) {
+function MenuBar({
+  editor,
+  onImageClick,
+}: {
+  editor: ReturnType<typeof useEditor>;
+  onImageClick: () => void;
+}) {
   if (!editor) return null;
 
   const buttons = [
@@ -72,12 +89,7 @@ function MenuBar({ editor }: { editor: ReturnType<typeof useEditor> }) {
     },
     {
       label: "Image",
-      action: () => {
-        const url = window.prompt("Enter image URL:");
-        if (url) {
-          editor.chain().focus().setImage({ src: url }).run();
-        }
-      },
+      action: onImageClick,
       active: false,
     },
   ];
@@ -109,6 +121,10 @@ export function TipTapEditor({
   placeholder = "Start writing...",
   className,
 }: TipTapEditorProps) {
+  const [showMediaPicker, setShowMediaPicker] = useState(false);
+  const [media, setMedia] = useState<MediaItem[]>([]);
+  const [loadingMedia, setLoadingMedia] = useState(false);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -122,6 +138,26 @@ export function TipTapEditor({
     },
   });
 
+  useEffect(() => {
+    if (showMediaPicker) {
+      setLoadingMedia(true);
+      apiFetch<{ data: MediaItem[] }>("/media?pageSize=50&type=image")
+        .then((res) => setMedia(res.data))
+        .catch(() => {})
+        .finally(() => setLoadingMedia(false));
+    }
+  }, [showMediaPicker]);
+
+  const handleImageSelect = useCallback(
+    (url: string) => {
+      if (editor) {
+        editor.chain().focus().setImage({ src: url }).run();
+      }
+      setShowMediaPicker(false);
+    },
+    [editor]
+  );
+
   return (
     <div
       className={clsx(
@@ -129,10 +165,45 @@ export function TipTapEditor({
         className
       )}
     >
-      <MenuBar editor={editor} />
+      <MenuBar
+        editor={editor}
+        onImageClick={() => setShowMediaPicker(true)}
+      />
       <div className="p-4">
         <EditorContent editor={editor} className="tiptap" />
       </div>
+
+      <Modal
+        open={showMediaPicker}
+        onClose={() => setShowMediaPicker(false)}
+        title="Insert Image"
+        size="xl"
+      >
+        {loadingMedia ? (
+          <p className="text-center text-gray-500 py-8">Loading...</p>
+        ) : media.length === 0 ? (
+          <p className="text-center text-gray-500 py-8">
+            No images found. Upload some media first.
+          </p>
+        ) : (
+          <div className="grid grid-cols-4 gap-3 max-h-96 overflow-y-auto">
+            {media.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => handleImageSelect(item.url)}
+                className="relative aspect-square rounded-lg overflow-hidden border-2 border-transparent hover:border-primary-500 transition-colors"
+              >
+                <img
+                  src={item.url}
+                  alt={item.filename}
+                  className="w-full h-full object-cover"
+                />
+              </button>
+            ))}
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

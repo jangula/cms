@@ -157,11 +157,13 @@ export async function getPublicDocuments(options?: {
   }
 
   if (options?.search) {
-    where.OR = [
-      { title: { string_contains: options.search } },
-      { description: { string_contains: options.search } },
-      { fileName: { contains: options.search, mode: "insensitive" } },
-    ];
+    const searchPattern = `%${options.search}%`;
+    const matchingIds = await prisma.$queryRaw<Array<{ id: string }>>`
+      SELECT id FROM "Document"
+      WHERE "isPublic" = true
+        AND (title::text ILIKE ${searchPattern} OR description::text ILIKE ${searchPattern} OR "fileName" ILIKE ${searchPattern})
+    `;
+    where.id = { in: matchingIds.map((r) => r.id) };
   }
 
   const [documents, total] = await Promise.all([
@@ -185,50 +187,33 @@ export async function getDocumentCategories() {
   });
 }
 
-export async function searchContent(query: string, locale: Locale) {
+export async function searchContent(query: string, _locale: Locale) {
   if (!query || query.length < 2) return { pages: [], articles: [], documents: [] };
 
+  const searchPattern = `%${query}%`;
+
   const [pages, articles, documents] = await Promise.all([
-    prisma.page.findMany({
-      where: {
-        status: "PUBLISHED",
-        OR: [
-          { title: { string_contains: query } },
-          { content: { string_contains: query } },
-        ],
-      },
-      select: { slug: true, title: true, excerpt: true },
-      take: 10,
-    }),
-    prisma.article.findMany({
-      where: {
-        status: "PUBLISHED",
-        OR: [
-          { title: { string_contains: query } },
-          { content: { string_contains: query } },
-        ],
-      },
-      select: { slug: true, title: true, excerpt: true, publishedAt: true },
-      take: 10,
-    }),
-    prisma.document.findMany({
-      where: {
-        isPublic: true,
-        OR: [
-          { title: { string_contains: query } },
-          { fileName: { contains: query, mode: "insensitive" } },
-        ],
-      },
-      select: {
-        id: true,
-        title: true,
-        fileName: true,
-        fileUrl: true,
-        fileSize: true,
-        mimeType: true,
-      },
-      take: 10,
-    }),
+    prisma.$queryRaw`
+      SELECT slug, title, excerpt
+      FROM "Page"
+      WHERE status = 'PUBLISHED'
+        AND (title::text ILIKE ${searchPattern} OR content::text ILIKE ${searchPattern})
+      LIMIT 10
+    ` as Promise<Array<{ slug: string; title: unknown; excerpt: unknown }>>,
+    prisma.$queryRaw`
+      SELECT slug, title, excerpt, "publishedAt"
+      FROM "Article"
+      WHERE status = 'PUBLISHED'
+        AND (title::text ILIKE ${searchPattern} OR content::text ILIKE ${searchPattern})
+      LIMIT 10
+    ` as Promise<Array<{ slug: string; title: unknown; excerpt: unknown; publishedAt: Date | null }>>,
+    prisma.$queryRaw`
+      SELECT id, title, "fileName", "fileUrl", "fileSize", "mimeType"
+      FROM "Document"
+      WHERE "isPublic" = true
+        AND (title::text ILIKE ${searchPattern} OR "fileName" ILIKE ${searchPattern})
+      LIMIT 10
+    ` as Promise<Array<{ id: string; title: unknown; fileName: string; fileUrl: string; fileSize: number; mimeType: string }>>,
   ]);
 
   return { pages, articles, documents };

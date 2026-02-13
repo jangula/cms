@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { slug, title, content, excerpt, featuredImage, seo, status, template, parentId } =
+    const { slug, title, content, excerpt, featuredImage, seo, status, template, parentId, publishedAt } =
       body;
 
     if (!slug || !title || !content) {
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
         status: status || "DRAFT",
         template: template || "default",
         parentId,
-        publishedAt: status === "PUBLISHED" ? new Date() : null,
+        publishedAt: publishedAt ? new Date(publishedAt) : (status === "PUBLISHED" ? new Date() : null),
         authorId: auth.sub,
       },
       include: {

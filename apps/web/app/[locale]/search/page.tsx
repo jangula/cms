@@ -60,22 +60,25 @@ export default async function SearchPage({ params, searchParams }: Props) {
                 {t("search.pages", locale)}
               </h2>
               <div className="space-y-3">
-                {results.pages.map((page) => (
-                  <a
-                    key={page.slug}
-                    href={`/${locale}/${page.slug}`}
-                    className="block bg-white rounded-lg border border-gray-200 p-4 hover:border-primary-300 transition-colors"
-                  >
-                    <h3 className="font-medium text-primary-700">
-                      {getLocalizedField(page.title as Record<string, string>, locale)}
-                    </h3>
-                    {page.excerpt && (
-                      <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                        {getLocalizedField(page.excerpt as Record<string, string>, locale)}
-                      </p>
-                    )}
-                  </a>
-                ))}
+                {results.pages.map((page) => {
+                  const excerpt = page.excerpt as Record<string, string> | null;
+                  return (
+                    <a
+                      key={page.slug}
+                      href={`/${locale}/${page.slug}`}
+                      className="block bg-white rounded-lg border border-gray-200 p-4 hover:border-primary-300 transition-colors"
+                    >
+                      <h3 className="font-medium text-primary-700">
+                        {getLocalizedField(page.title as Record<string, string>, locale)}
+                      </h3>
+                      {excerpt && (
+                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                          {getLocalizedField(excerpt, locale)}
+                        </p>
+                      )}
+                    </a>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -87,29 +90,32 @@ export default async function SearchPage({ params, searchParams }: Props) {
                 {t("search.articles", locale)}
               </h2>
               <div className="space-y-3">
-                {results.articles.map((article) => (
-                  <a
-                    key={article.slug}
-                    href={`/${locale}/news/${article.slug}`}
-                    className="block bg-white rounded-lg border border-gray-200 p-4 hover:border-primary-300 transition-colors"
-                  >
-                    <h3 className="font-medium text-primary-700">
-                      {getLocalizedField(article.title as Record<string, string>, locale)}
-                    </h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      {article.publishedAt && (
-                        <span className="text-xs text-gray-500">
-                          {formatDate(article.publishedAt, locale)}
-                        </span>
+                {results.articles.map((article) => {
+                  const excerpt = article.excerpt as Record<string, string> | null;
+                  return (
+                    <a
+                      key={article.slug}
+                      href={`/${locale}/news/${article.slug}`}
+                      className="block bg-white rounded-lg border border-gray-200 p-4 hover:border-primary-300 transition-colors"
+                    >
+                      <h3 className="font-medium text-primary-700">
+                        {getLocalizedField(article.title as Record<string, string>, locale)}
+                      </h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        {article.publishedAt && (
+                          <span className="text-xs text-gray-500">
+                            {formatDate(article.publishedAt, locale)}
+                          </span>
+                        )}
+                      </div>
+                      {excerpt && (
+                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                          {getLocalizedField(excerpt, locale)}
+                        </p>
                       )}
-                    </div>
-                    {article.excerpt && (
-                      <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                        {getLocalizedField(article.excerpt as Record<string, string>, locale)}
-                      </p>
-                    )}
-                  </a>
-                ))}
+                    </a>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -134,8 +140,7 @@ export default async function SearchPage({ params, searchParams }: Props) {
                         <p className="text-xs text-gray-500 mt-1">{doc.fileName}</p>
                       </div>
                       <a
-                        href={doc.fileUrl}
-                        download
+                        href={`/api/documents/${doc.id}/download`}
                         className="px-3 py-1.5 bg-primary-50 text-primary-700 rounded-lg text-sm font-medium hover:bg-primary-100 transition-colors"
                       >
                         {t("common.download", locale)}

@@ -15,6 +15,8 @@ interface PageData {
   excerpt: Record<string, string>;
   featuredImage: string;
   status: string;
+  publishedAt: string;
+  seo: Record<string, { title: string; description: string; ogImage: string }>;
 }
 
 export default function EditPagePage({

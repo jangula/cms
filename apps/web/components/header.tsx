@@ -54,9 +54,12 @@ export async function Header({ locale }: { locale: Locale }) {
                     item.label as Record<string, string>,
                     locale
                   );
+                  const rawUrl = item.url || "#";
                   const href = item.pageId
-                    ? `/${locale}/${item.url || ""}`
-                    : item.url || "#";
+                    ? `/${locale}/${rawUrl}`
+                    : rawUrl.startsWith("/")
+                      ? `/${locale}${rawUrl}`
+                      : rawUrl;
 
                   return (
                     <div key={item.id} className="relative group">
@@ -75,7 +78,9 @@ export async function Header({ locale }: { locale: Locale }) {
                               href={
                                 child.pageId
                                   ? `/${locale}/${child.url || ""}`
-                                  : child.url || "#"
+                                  : (child.url || "#").startsWith("/")
+                                    ? `/${locale}${child.url}`
+                                    : child.url || "#"
                               }
                               target={child.target}
                               className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-600"
