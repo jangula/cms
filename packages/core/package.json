@@ -13,7 +13,7 @@
     "./utils": "./src/utils/index.ts"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "prisma generate --schema=src/db/prisma/schema.prisma && tsc",
     "dev": "tsc --watch",
     "db:generate": "prisma generate --schema=src/db/prisma/schema.prisma",
     "db:push": "prisma db push --schema=src/db/prisma/schema.prisma",
@@ -34,7 +34,7 @@
     "@types/node": "^22.12.0",
     "@types/sanitize-html": "^2.16.1",
     "next": "^16.2.9",
-    "prisma": "^7.8.0",
+    "prisma": "^6.19.2",
     "tsx": "^4.22.4",
     "typescript": "^5.7.3",
     "@angulacms/config": "workspace:*"

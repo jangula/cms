@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Input, Select, Card, CardTitle, Badge, Modal } from "@angulacms/ui";
+import { Button, Input, Select, Card, CardTitle, Modal } from "@angulacms/ui";
 import { MultilingualInput } from "@/components/pages/multilingual-input";
 import { TipTapEditor } from "@/components/editor/tiptap-editor";
 import { MediaPicker } from "@/components/media/media-picker";

@@ -10,6 +10,10 @@ export const metadata: Metadata = {
   description: "Powered by AngulaCMS",
 };
 
+// Content is sourced from the database at request time, so these routes must
+// be rendered dynamically rather than prerendered at build (no DB in CI).
+export const dynamic = "force-dynamic";
+
 export function generateStaticParams() {
   return SUPPORTED_LOCALES.map((locale) => ({ locale }));
 }
