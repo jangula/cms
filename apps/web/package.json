@@ -11,7 +11,7 @@
   "dependencies": {
     "@angulacms/core": "workspace:*",
     "@angulacms/ui": "workspace:*",
-    "next": "^15.1.6",
+    "next": "^15.5.18",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },
