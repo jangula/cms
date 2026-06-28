@@ -5,7 +5,6 @@ import {
   type Locale,
   SUPPORTED_LOCALES,
   getLocalizedField,
-  formatDate,
   formatDateTime,
   t,
 } from "@/lib/i18n";

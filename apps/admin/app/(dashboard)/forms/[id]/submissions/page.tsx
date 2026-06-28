@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
-import { Button, Card, CardTitle, Modal } from "@angulacms/ui";
+import { Button, Card, Modal } from "@angulacms/ui";
 import { apiFetch } from "@/lib/api";
 
 interface Submission {

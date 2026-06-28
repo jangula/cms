@@ -37,7 +37,7 @@ const AVAILABLE_LANGUAGES = [
 ];
 
 export default function SettingsPage() {
-  const [site, setSite] = useState<SiteData | null>(null);
+  const [, setSite] = useState<SiteData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<"general" | "theme" | "social" | "seo">("general");

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button, Card, CardTitle, Badge, Modal } from "@angulacms/ui";
+import { Button, Badge, Modal } from "@angulacms/ui";
 import { apiFetch } from "@/lib/api";
 
 interface Revision {
