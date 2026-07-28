@@ -24,6 +24,6 @@
     "@angulacms/config": "workspace:*",
     "tailwindcss": "^4.3.1",
     "@tailwindcss/postcss": "^4.3.1",
-    "postcss": "^8.5.15"
+    "postcss": "^8.5.18"
   }
 }
